@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstdint>
 
+// 与 const int Ai::scoreList 对应，用来查表
 enum class ScoreIndex
 {
     ZERO = 0,
@@ -144,14 +145,14 @@ int Ai::rowScore(Piece::Color turn)
             }
             else
             {
-                score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row][col])];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row][col]) ];
                 length = 0;
                 prev = (*(this->_map))[row][col];
             }
         }
 
         // 末端
-        score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn))];
+        score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn)) ];
     }
     
     return score;
@@ -175,14 +176,14 @@ int Ai::colScore(Piece::Color turn)
             }
             else
             {
-                score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row][col])];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row][col]) ];
                 length = 0;
                 prev = (*(this->_map))[row][col];
             }
         }
 
         // 末端
-        score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn))];
+        score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn)) ];
     }
     
     return score;
@@ -192,12 +193,115 @@ int Ai::colScore(Piece::Color turn)
 int Ai::slashScore(Piece::Color turn)
 {
     int score = 0;
-    return 0;
+
+    // 右上角
+    for(int col = 0; col < 15; col++)
+    {
+        // 由于最开始在边缘上，前面不能落子，相当于有对手的子
+        Piece::Color prev = COLOR_ANOTHER(turn); 
+        int length = 0;
+
+        for(int n = 0; n < 15 - col; n++)
+        {
+            if((*(this->_map))[n][col+n] == turn) 
+            {
+                length += 1;
+            }
+            else
+            {
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[n][col+n]) ];
+                length = 0;
+                prev = (*(this->_map))[n][col+n];
+            }
+        }
+
+        // 末端
+        score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn)) ];
+    }
+
+    // 左下角
+    for(int row = 1; row < 15; row++)
+    {
+        // 由于最开始在边缘上，前面不能落子，相当于有对手的子
+        Piece::Color prev = COLOR_ANOTHER(turn); 
+        int length = 0;
+
+        for(int n = 0; n < 15 - row; n++)
+        {
+            if((*(this->_map))[row+n][n] == turn)
+            {
+                length += 1;
+            }
+            else
+            {
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row+n][n]) ];
+                length = 0;
+                prev = (*(this->_map))[row+n][n];
+            }
+            
+        }
+
+        // 末端
+        score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn))];
+    }
+
+    return score;
 }
 
 
 int Ai::backSlashScore(Piece::Color turn)
 {
     int score = 0;
-    return 0;
+
+    // 左上角
+    for(int col = 0; col < 15; col++)
+    {
+        // 由于最开始在边缘上，前面不能落子，相当于有对手的子
+        Piece::Color prev = COLOR_ANOTHER(turn); 
+        int length = 0;
+
+        for(int n = 0; n < 15 - col; n++)
+        {
+            if((*(this->_map))[n][col+n] == turn)
+            {
+                length += 1;
+            }
+            else
+            {
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[n][col+n]) ];
+                length = 0;
+                prev = (*(this->_map))[n][col+n];
+            }
+        }
+
+        // 末端
+        score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn))];
+    }
+
+    // 右下角
+    for(int row = 1; row < 15; row++)
+    {
+        // 由于最开始在边缘上，前面不能落子，相当于有对手的子
+        Piece::Color prev = COLOR_ANOTHER(turn); 
+        int length = 0;
+
+        for(int n = 0; n < 15 - row; n++)
+        {
+            if((*(this->_map))[row+n][n] == turn)
+            {
+                length += 1;
+            }
+            else
+            {
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row+n][n]) ];
+                length = 0;
+                prev = (*(this->_map))[row+n][n];
+            }
+        }
+
+        // 末端
+        score += Ai::scoreList[Ai::getScoreIndex(length, turn, prev, COLOR_ANOTHER(turn))];
+    }
+
+    return score;
 }
