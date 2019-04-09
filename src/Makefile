@@ -1,6 +1,6 @@
 CXXFLAGS = -std=c++11 -O3 -W -Wall -Wextra -Wno-unused-parameter
 ifeq ($(opt), mingw)
-	LD_FLAGS = -lmingw32 -lSDL2main -lSDL2 -mwindows
+	LD_FLAGS = -lmingw32 -lSDL2main -lSDL2 
 else
 	LD_FLAGS = -lSDL2 
 endif

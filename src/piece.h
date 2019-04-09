@@ -22,4 +22,6 @@ private:
     int _length;
 };
 
+#define COLOR_ANOTHER(color) (color==Piece::Color::WHITE ? Piece::Color::BLACK : color==Piece::Color::BLACK ? Piece::Color::WHITE : Piece::Color::NONE)
+
 #endif
