@@ -10,10 +10,10 @@ public:
     bool update();
 
     /* 极大值搜索 */
-    int max(Piece::Color turn, int step, int* row=nullptr, int* col=nullptr);
+    int max(Piece::Color turn, int step, int alpha, int* row=nullptr, int* col=nullptr);
 
     /* 极小值搜索 */
-    int min(Piece::Color turn, int step, int* row=nullptr, int* col=nullptr);
+    int min(Piece::Color turn, int step, int beta, int* row=nullptr, int* col=nullptr);
 
     /* 评分函数 */
     int score(Piece::Color turn);
@@ -32,6 +32,7 @@ public:
 
 private:
     Piece::Color (*_map)[15][15];
+    static int indexList[15*15][2];
 
     static const int scoreList[];
     static int getScoreIndex(int length, Piece::Color turn, Piece::Color prev, Piece::Color next);
