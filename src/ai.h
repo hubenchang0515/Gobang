@@ -8,6 +8,14 @@ class Ai
 public:
     Ai(Piece::Color (*map)[15][15]);
     bool update();
+
+    /* 极大值搜索 */
+    int max(Piece::Color turn, int step, int* row=nullptr, int* col=nullptr);
+
+    /* 极小值搜索 */
+    int min(Piece::Color turn, int step, int* row=nullptr, int* col=nullptr);
+
+    /* 评分函数 */
     int score(Piece::Color turn);
 
     /* 计算各个行的总分 */
@@ -16,10 +24,10 @@ public:
     /* 计算各个列的总分 */
     int colScore(Piece::Color turn);
 
-    /* 计算各个正斜线(\)的总分 */
+    /* 计算各个正斜线(/)的总分 */
     int slashScore(Piece::Color turn);
 
-    /* 计算各个反斜线(/)的总分 */
+    /* 计算各个反斜线(\)的总分 */
     int backSlashScore(Piece::Color turn);
 
 private:
