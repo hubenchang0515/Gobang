@@ -156,7 +156,7 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
             this->_map[row][col+1] == Piece::Color::NONE &&
             this->_map[row+1][col-1] == Piece::Color::NONE &&
             this->_map[row+1][col] == Piece::Color::NONE &&
-            this->_map[row+1][col-1] == Piece::Color::NONE)
+            this->_map[row+1][col+1] == Piece::Color::NONE)
         {
             continue;
         }
@@ -227,7 +227,7 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
             this->_map[row][col+1] == Piece::Color::NONE &&
             this->_map[row+1][col-1] == Piece::Color::NONE &&
             this->_map[row+1][col] == Piece::Color::NONE &&
-            this->_map[row+1][col-1] == Piece::Color::NONE)
+            this->_map[row+1][col+1] == Piece::Color::NONE)
         {
             continue;
         }
