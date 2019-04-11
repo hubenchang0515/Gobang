@@ -123,8 +123,9 @@ bool Ai::update()
     int col = -1;
     totalSteps = 0;
     memcpy(&(this->_map), this->_situationMap, sizeof(Piece::Color[15][15]));
-    int score = this->max(Piece::Color::WHITE, 6, INT_MAX, &row, &col);
+    int score = this->max(Piece::Color::WHITE, 4, INT_MAX, &row, &col);
     SDL_Log("use %d steps", totalSteps);
+    this->_map[row][col] = Piece::Color::WHITE;
     (*(this->_situationMap))[row][col] = Piece::Color::WHITE;
     SDL_Log("White go (%d,%d)", row, col);
     SDL_Log("Score : %d", score);
@@ -145,7 +146,8 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
         int col = Ai::indexList[i][1];
 
         // 特殊加速，如果该空位周围8个位置 均无子，则忽略
-        if(this->_map[row-1][col-1] == Piece::Color::NONE &&
+        if(row > 1 && row < 14 && col > 1 && col < 14 &&
+            this->_map[row-1][col-1] == Piece::Color::NONE &&
             this->_map[row-1][col] == Piece::Color::NONE &&
             this->_map[row-1][col+1] == Piece::Color::NONE &&
             this->_map[row][col-1] == Piece::Color::NONE &&
@@ -215,7 +217,8 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
         int col = Ai::indexList[i][1];
 
         // 特殊加速，如果该空位周围8个位置 均无子，则忽略
-        if(this->_map[row-1][col-1] == Piece::Color::NONE &&
+        if( row > 1 && row < 14 && col > 1 && col < 14 &&
+            this->_map[row-1][col-1] == Piece::Color::NONE &&
             this->_map[row-1][col] == Piece::Color::NONE &&
             this->_map[row-1][col+1] == Piece::Color::NONE &&
             this->_map[row][col-1] == Piece::Color::NONE &&
@@ -475,7 +478,7 @@ int Ai::slashScore(Piece::Color turn)
     }
 
     // 右下角
-    for(int row = 1; row < 2; row++)
+    for(int row = 1; row < 15; row++)
     {
         // 由于最开始在边缘上，前面不能落子，相当于有对手的子
         Piece::Color prev = COLOR_ANOTHER(turn); 

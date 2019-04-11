@@ -108,10 +108,11 @@ bool Situation::update(SDL_Event* event)
             SDL_LockMutex(this->aiRunningMutex);
             this->aiRunning = true;
             SDL_UnlockMutex(this->aiRunningMutex);
-            
+
             SDL_Thread* th = SDL_CreateThread(Situation::updateThread, "update", this);
             SDL_DetachThread(th);
         }
+
         
 
     }
