@@ -9,6 +9,7 @@ class Situation : public AbstractObject
 {
 public:
     Situation(int length);
+    ~Situation();
     virtual bool draw(SDL_Renderer* renderer);
     virtual bool update(SDL_Event* event);
     bool player(SDL_Event* event);
@@ -26,6 +27,10 @@ private:
     Piece _piece;
     Ai _ai;
     Piece::Color winner;
+    bool aiRunning;
+    SDL_mutex* aiRunningMutex;
+
+    static int updateThread(void* data);
 };
 
 #endif

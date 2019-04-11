@@ -87,7 +87,7 @@ int Ai::getScoreIndex(int length, Piece::Color turn, Piece::Color prev, Piece::C
 
 Ai::Ai(Piece::Color (*map)[15][15])
 {
-    this->_map = map;
+    this->_situationMap = map;
     int i = 0;
     Ai::indexList[0][0] = 7;
     Ai::indexList[0][1] = 7;
@@ -122,9 +122,10 @@ bool Ai::update()
     int row = -1;
     int col = -1;
     totalSteps = 0;
-    int score = this->max(Piece::Color::WHITE, 4, INT_MAX, &row, &col);
+    memcpy(&(this->_map), this->_situationMap, sizeof(Piece::Color[15][15]));
+    int score = this->max(Piece::Color::WHITE, 6, INT_MAX, &row, &col);
     SDL_Log("use %d steps", totalSteps);
-    (*(this->_map))[row][col] = Piece::Color::WHITE;
+    (*(this->_situationMap))[row][col] = Piece::Color::WHITE;
     SDL_Log("White go (%d,%d)", row, col);
     SDL_Log("Score : %d", score);
     SDL_Log("Black Score : %d", this->score(Piece::Color::BLACK));
@@ -142,9 +143,23 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
     {
         int row = Ai::indexList[i][0];
         int col = Ai::indexList[i][1];
-        if((*(this->_map))[row][col] == Piece::Color::NONE)
+
+        // 特殊加速，如果该空位周围8个位置 均无子，则忽略
+        if(this->_map[row-1][col-1] == Piece::Color::NONE &&
+            this->_map[row-1][col] == Piece::Color::NONE &&
+            this->_map[row-1][col+1] == Piece::Color::NONE &&
+            this->_map[row][col-1] == Piece::Color::NONE &&
+            this->_map[row][col+1] == Piece::Color::NONE &&
+            this->_map[row+1][col-1] == Piece::Color::NONE &&
+            this->_map[row+1][col] == Piece::Color::NONE &&
+            this->_map[row+1][col-1] == Piece::Color::NONE)
         {
-            (*(this->_map))[row][col] = turn;
+            continue;
+        }
+
+        if(this->_map[row][col] == Piece::Color::NONE)
+        {
+            this->_map[row][col] = turn;
 
             int score_step = INT_MIN;
             if(step <= 1)
@@ -160,7 +175,7 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
             // alpha剪枝
             if(score_step >= alpha)
             {
-                (*(this->_map))[row][col] = Piece::Color::NONE;
+                this->_map[row][col] = Piece::Color::NONE;
                 
                 return alpha;
             }
@@ -172,7 +187,7 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
                 col_result = col;
             }
 
-            (*(this->_map))[row][col] = Piece::Color::NONE;
+            this->_map[row][col] = Piece::Color::NONE;
         }
     }
 
@@ -198,9 +213,23 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
     {
         int row = Ai::indexList[i][0];
         int col = Ai::indexList[i][1];
-        if((*(this->_map))[row][col] == Piece::Color::NONE)
+
+        // 特殊加速，如果该空位周围8个位置 均无子，则忽略
+        if(this->_map[row-1][col-1] == Piece::Color::NONE &&
+            this->_map[row-1][col] == Piece::Color::NONE &&
+            this->_map[row-1][col+1] == Piece::Color::NONE &&
+            this->_map[row][col-1] == Piece::Color::NONE &&
+            this->_map[row][col+1] == Piece::Color::NONE &&
+            this->_map[row+1][col-1] == Piece::Color::NONE &&
+            this->_map[row+1][col] == Piece::Color::NONE &&
+            this->_map[row+1][col-1] == Piece::Color::NONE)
         {
-            (*(this->_map))[row][col] = COLOR_ANOTHER(turn);
+            continue;
+        }
+
+        if(this->_map[row][col] == Piece::Color::NONE)
+        {
+            this->_map[row][col] = COLOR_ANOTHER(turn);
 
             int score_step = INT_MAX;
             if(step <= 1)
@@ -216,7 +245,7 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
             // beta剪枝
             if(score_step <= beta)
             {
-                (*(this->_map))[row][col] = Piece::Color::NONE;
+                this->_map[row][col] = Piece::Color::NONE;
                 
                 return beta;
             }
@@ -228,7 +257,7 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
                 col_result = col;
             }
 
-            (*(this->_map))[row][col] = Piece::Color::NONE;
+            this->_map[row][col] = Piece::Color::NONE;
         }
     }
 
@@ -266,7 +295,7 @@ int Ai::rowScore(Piece::Color turn)
 
         for(int col = 0; col < 15; col++)
         {
-            if((*(this->_map))[row][col] == turn) 
+            if(this->_map[row][col] == turn) 
             {
                 length += 1;
             }
@@ -276,9 +305,9 @@ int Ai::rowScore(Piece::Color turn)
                 {
                     return Ai::scoreList[static_cast<int>(ScoreIndex::FIVE)];
                 }
-                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row][col]) ];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, this->_map[row][col]) ];
                 length = 0;
-                prev = (*(this->_map))[row][col];
+                prev = this->_map[row][col];
             }
         }
 
@@ -305,7 +334,7 @@ int Ai::colScore(Piece::Color turn)
 
         for(int row = 0; row < 15; row++)
         {
-            if((*(this->_map))[row][col] == turn) 
+            if(this->_map[row][col] == turn) 
             {
                 length += 1;
             }
@@ -315,9 +344,9 @@ int Ai::colScore(Piece::Color turn)
                 {
                     return Ai::scoreList[static_cast<int>(ScoreIndex::FIVE)];
                 }
-                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row][col]) ];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, this->_map[row][col]) ];
                 length = 0;
-                prev = (*(this->_map))[row][col];
+                prev = this->_map[row][col];
             }
         }
 
@@ -346,7 +375,7 @@ int Ai::backSlashScore(Piece::Color turn)
 
         for(int n = 0; n < 15 - col; n++)
         {
-            if((*(this->_map))[n][col+n] == turn) 
+            if(this->_map[n][col+n] == turn) 
             {
                 length += 1;
             }
@@ -356,9 +385,9 @@ int Ai::backSlashScore(Piece::Color turn)
                 {
                     return Ai::scoreList[static_cast<int>(ScoreIndex::FIVE)];
                 }
-                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[n][col+n]) ];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, this->_map[n][col+n]) ];
                 length = 0;
-                prev = (*(this->_map))[n][col+n];
+                prev = this->_map[n][col+n];
             }
         }
 
@@ -379,7 +408,7 @@ int Ai::backSlashScore(Piece::Color turn)
 
         for(int n = 0; n < 15 - row; n++)
         {
-            if((*(this->_map))[row+n][n] == turn)
+            if(this->_map[row+n][n] == turn)
             {
                 length += 1;
             }
@@ -389,9 +418,9 @@ int Ai::backSlashScore(Piece::Color turn)
                 {
                     return Ai::scoreList[static_cast<int>(ScoreIndex::FIVE)];
                 }
-                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row+n][n]) ];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, this->_map[row+n][n]) ];
                 length = 0;
-                prev = (*(this->_map))[row+n][n];
+                prev = this->_map[row+n][n];
             }
             
         }
@@ -421,7 +450,7 @@ int Ai::slashScore(Piece::Color turn)
 
         for(int n = 0; n < col+1; n++)
         {
-            if((*(this->_map))[n][col-n] == turn)
+            if(this->_map[n][col-n] == turn)
             {
                 length += 1;
             }
@@ -431,9 +460,9 @@ int Ai::slashScore(Piece::Color turn)
                 {
                     return Ai::scoreList[static_cast<int>(ScoreIndex::FIVE)];
                 }
-                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[n][col-n]) ];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, this->_map[n][col-n]) ];
                 length = 0;
-                prev = (*(this->_map))[n][col-n];
+                prev = this->_map[n][col-n];
             }
         }
 
@@ -454,7 +483,7 @@ int Ai::slashScore(Piece::Color turn)
 
         for(int n = 0; n < 15 - row; n++)
         {
-            if((*(this->_map))[row+n][14-n] == turn)
+            if(this->_map[row+n][14-n] == turn)
             {
                 length += 1;
             }
@@ -464,9 +493,9 @@ int Ai::slashScore(Piece::Color turn)
                 {
                     return Ai::scoreList[static_cast<int>(ScoreIndex::FIVE)];
                 }
-                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, (*(this->_map))[row+n][15-row-n]) ];
+                score += Ai::scoreList[ Ai::getScoreIndex(length, turn, prev, this->_map[row+n][15-row-n]) ];
                 length = 0;
-                prev = (*(this->_map))[row+n][15-row-n];
+                prev = this->_map[row+n][15-row-n];
             }
         }
 

@@ -31,7 +31,8 @@ public:
     int backSlashScore(Piece::Color turn);
 
 private:
-    Piece::Color (*_map)[15][15];
+    Piece::Color (*_situationMap)[15][15];
+    Piece::Color _map[15][15];
     static int indexList[15*15][2];
 
     static const int scoreList[];

@@ -11,6 +11,13 @@ Situation::Situation(int length) :
     this->_pointer.x = -1;
     this->_pointer.y = -1;
     this->winner = Piece::Color::NONE;
+    this->aiRunning = false;
+    this->aiRunningMutex = SDL_CreateMutex();
+}
+
+Situation::~Situation()
+{
+    SDL_DestroyMutex(this->aiRunningMutex);
 }
 
 bool Situation::draw(SDL_Renderer* renderer)
@@ -28,10 +35,12 @@ bool Situation::draw(SDL_Renderer* renderer)
     {
         if(this->winner == Piece::Color::BLACK)
         {
+            SDL_RenderPresent(renderer);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "You win", nullptr);
         }
         else if(this->winner == Piece::Color::WHITE)
         {
+            SDL_RenderPresent(renderer);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "You loss", nullptr);
         }
         memset(this->_map, 0, sizeof(Piece::Color[15][15]));
@@ -52,6 +61,29 @@ bool Situation::checkWin(Piece::Color turn)
     return false;
 }
 
+int Situation::updateThread(void* data)
+{
+    
+    Situation* self = static_cast<Situation*>(data);
+
+    self->_pointer.x = -1;
+    self->_pointer.y = -1;
+    if(self->_ai.update())
+    {
+        if(self->checkWin(Piece::Color::WHITE))
+        {
+            self->winner = Piece::Color::WHITE;
+        }
+        self->_turn = Piece::Color::BLACK;
+    }
+
+    SDL_LockMutex(self->aiRunningMutex);
+    self->aiRunning = false;
+    SDL_UnlockMutex(self->aiRunningMutex);
+    
+    return 0;
+}
+
 bool Situation::update(SDL_Event* event)
 {
     if(this->_turn == Piece::Color::BLACK)
@@ -67,17 +99,23 @@ bool Situation::update(SDL_Event* event)
     }
     else
     {
-        this->_pointer.x = -1;
-        this->_pointer.y = -1;
-        if(this->_ai.update())
+        SDL_LockMutex(this->aiRunningMutex);
+        bool aiRunning = this->aiRunning;
+        SDL_UnlockMutex(this->aiRunningMutex);
+        
+        if(!aiRunning)
         {
-            if(this->checkWin(Piece::Color::WHITE))
-            {
-                this->winner = Piece::Color::WHITE;
-            }
-            this->_turn = Piece::Color::BLACK;
+            SDL_LockMutex(this->aiRunningMutex);
+            this->aiRunning = true;
+            SDL_UnlockMutex(this->aiRunningMutex);
+            
+            SDL_Thread* th = SDL_CreateThread(Situation::updateThread, "update", this);
+            SDL_DetachThread(th);
         }
+        
+
     }
+    
     
     return true;
 }
@@ -93,6 +131,7 @@ bool Situation::player(SDL_Event* event)
 		if(row >= 0 && row <= 14 && col >= 0 && col <= 14 && this->_map[row][col] == Piece::Color::NONE)
 		{	
 			this->_map[row][col] = Piece::Color::BLACK;
+            SDL_Log("Black go (%d,%d)", row, col);
             return true;
 		}
     }
