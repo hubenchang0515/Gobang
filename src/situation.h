@@ -23,6 +23,8 @@ public:
 private:
     int _length;
     SDL_Point _pointer;
+    SDL_Point _playerLast;
+    SDL_Point _aiLast;
     Piece::Color _turn;
     Piece _piece;
     Ai _ai;

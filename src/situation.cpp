@@ -31,6 +31,24 @@ bool Situation::draw(SDL_Renderer* renderer)
     }
     this->_piece.draw(renderer, this->_pointer.y, this->_pointer.x, Piece::Color::BLACK);
 
+    int gridSideLength = this->_length / 16;
+    int flagSideLength = gridSideLength / 8;
+    SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff);
+    int x = (this->_aiLast.x + 1) * gridSideLength;
+    int y = (this->_aiLast.y + 1) * gridSideLength;
+    SDL_RenderDrawLine(renderer, x, y, x, y - flagSideLength);
+    SDL_RenderDrawLine(renderer, x, y, x, y + flagSideLength);
+    SDL_RenderDrawLine(renderer, x, y, x - flagSideLength, y);
+    SDL_RenderDrawLine(renderer, x, y, x + flagSideLength, y);
+
+    SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0xff);
+    x = (this->_playerLast.x + 1) * gridSideLength;
+    y = (this->_playerLast.y + 1) * gridSideLength;
+    SDL_RenderDrawLine(renderer, x, y, x, y - flagSideLength);
+    SDL_RenderDrawLine(renderer, x, y, x, y + flagSideLength);
+    SDL_RenderDrawLine(renderer, x, y, x - flagSideLength, y);
+    SDL_RenderDrawLine(renderer, x, y, x + flagSideLength, y);
+
     if(this->winner != Piece::Color::NONE)
     {
         if(this->winner == Piece::Color::BLACK)
@@ -68,7 +86,7 @@ int Situation::updateThread(void* data)
 
     self->_pointer.x = -1;
     self->_pointer.y = -1;
-    if(self->_ai.update())
+    if(self->_ai.update(&(self->_aiLast)))
     {
         if(self->checkWin(Piece::Color::WHITE))
         {
@@ -128,6 +146,8 @@ bool Situation::player(SDL_Event* event)
     {
         int row = (event->button.y - gridSideLength/2) / gridSideLength;
 		int col = (event->button.x - gridSideLength/2) / gridSideLength;
+        this->_playerLast.x = col;
+        this->_playerLast.y = row;
 		
 		if(row >= 0 && row <= 14 && col >= 0 && col <= 14 && this->_map[row][col] == Piece::Color::NONE)
 		{	
@@ -302,6 +322,7 @@ bool Situation::checkSlash(Piece::Color turn)
                 {
                     return true;
                 }
+                length = 0;
             }
         }
 

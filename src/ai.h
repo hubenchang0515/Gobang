@@ -7,7 +7,7 @@ class Ai
 {
 public:
     Ai(Piece::Color (*map)[15][15]);
-    bool update();
+    bool update(SDL_Point* point);
 
     /* 极大值搜索 */
     int max(Piece::Color turn, int step, int alpha, int* row=nullptr, int* col=nullptr);

@@ -37,7 +37,7 @@ const int Ai::scoreList[] =
     0,
     500,
     5000,
-    10000
+    50000
 };
 
 // 从中间往外围遍历
@@ -117,7 +117,7 @@ Ai::Ai(Piece::Color (*map)[15][15])
 }
 
 int totalSteps = 0;
-bool Ai::update()
+bool Ai::update(SDL_Point* point)
 {
     int row = -1;
     int col = -1;
@@ -131,6 +131,8 @@ bool Ai::update()
     SDL_Log("Score : %d", score);
     SDL_Log("Black Score : %d", this->score(Piece::Color::BLACK));
     SDL_Log("White Score : %d", this->score(Piece::Color::WHITE));
+    point->x = col;
+    point->y = row;
     
     return true;
 }
