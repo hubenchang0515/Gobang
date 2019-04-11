@@ -1,7 +1,7 @@
 #include "ai.h"
 #include <algorithm>
 #include <cstdint>
-
+#include <climits>
 // 与 const int Ai::scoreList 对应，用来查表
 enum class ScoreIndex
 {
