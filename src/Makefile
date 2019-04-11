@@ -1,8 +1,8 @@
 CXXFLAGS = -std=c++11 -O3 -W -Wall -Wextra -Wno-unused-parameter
 ifeq ($(opt), mingw)
-	LD_FLAGS = -lmingw32 -lSDL2main -lSDL2 
+	LD_FLAGS = -lmingw32 -lSDL2main -lSDL2 -mwindows
 else
-	LD_FLAGS = -lSDL2 
+	LD_FLAGS = -lSDL2 -no-pie
 endif
 
 TARGET_O = main.o ai.o board.o game.o piece.o situation.o
