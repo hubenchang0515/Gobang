@@ -51,14 +51,14 @@ bool Situation::draw(SDL_Renderer* renderer)
 
     if(this->winner != Piece::Color::NONE)
     {
+        SDL_RenderPresent(renderer);
+        SDL_Delay(100);
         if(this->winner == Piece::Color::BLACK)
         {
-            SDL_RenderPresent(renderer);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "You win", nullptr);
         }
         else if(this->winner == Piece::Color::WHITE)
         {
-            SDL_RenderPresent(renderer);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over", "You loss", nullptr);
         }
         memset(this->_map, 0, sizeof(Piece::Color[15][15]));
@@ -145,27 +145,28 @@ bool Situation::player(SDL_Event* event)
     if(event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT) 
     {
         int row = (event->button.y - gridSideLength/2) / gridSideLength;
-		int col = (event->button.x - gridSideLength/2) / gridSideLength;
-        this->_playerLast.x = col;
-        this->_playerLast.y = row;
-		
-		if(row >= 0 && row <= 14 && col >= 0 && col <= 14 && this->_map[row][col] == Piece::Color::NONE)
-		{	
-			this->_map[row][col] = Piece::Color::BLACK;
+        int col = (event->button.x - gridSideLength/2) / gridSideLength;
+        
+        
+        if(row >= 0 && row <= 14 && col >= 0 && col <= 14 && this->_map[row][col] == Piece::Color::NONE)
+        {    
+            this->_map[row][col] = Piece::Color::BLACK;
+            this->_playerLast.x = col;
+            this->_playerLast.y = row;
             SDL_Log("Black go (%d,%d)", row, col);
             return true;
-		}
+        }
     }
     if(event->type == SDL_MOUSEMOTION)
     {
         int row = (event->button.y - gridSideLength/2) / gridSideLength;
-		int col = (event->button.x - gridSideLength/2) / gridSideLength;
-		
-		if(row >= 0 && row <= 14 && col >= 0 && col <= 14 && this->_map[row][col] == Piece::Color::NONE)
-		{	
-			this->_pointer.x = col;
+        int col = (event->button.x - gridSideLength/2) / gridSideLength;
+        
+        if(row >= 0 && row <= 14 && col >= 0 && col <= 14 && this->_map[row][col] == Piece::Color::NONE)
+        {    
+            this->_pointer.x = col;
             this->_pointer.y = row;
-		}
+        }
     }
 
     return false;
