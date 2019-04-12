@@ -1,4 +1,5 @@
 #include "ai.h"
+#include <SDL2/SDL.h>
 #include <algorithm>
 #include <cstdint>
 #include <climits>
@@ -147,7 +148,7 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
         int row = Ai::indexList[i][0];
         int col = Ai::indexList[i][1];
 
-        // 特殊加速，如果该空位周围8个位置 均无子，则忽略
+        // foolish加速，如果该空位周围8个位置 均无子，则跳过改点计算
         if(row > 1 && row < 14 && col > 1 && col < 14 &&
             this->_map[row-1][col-1] == Piece::Color::NONE &&
             this->_map[row-1][col] == Piece::Color::NONE &&
@@ -170,6 +171,19 @@ int Ai::max(Piece::Color turn, int step, int alpha, int* row, int* col)
             {
                 score_step = this->score(turn) - this->score(COLOR_ANOTHER(turn));
                 totalSteps += 1;
+            }
+            else if(this->score(turn) >= Ai::scoreList[ static_cast<int>(ScoreIndex::FIVE) ])
+            {
+                score_step = Ai::scoreList[ static_cast<int>(ScoreIndex::FIVE) ] + 100 * step;
+                if(score_step > score)
+                {
+                    score = score_step;
+                    row_result = row;
+                    col_result = col;
+                }
+
+                this->_map[row][col] = Piece::Color::NONE;
+                break;
             }
             else
             {
@@ -218,7 +232,7 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
         int row = Ai::indexList[i][0];
         int col = Ai::indexList[i][1];
 
-        // 特殊加速，如果该空位周围8个位置 均无子，则忽略
+        // foolish加速，如果该空位周围8个位置 均无子，则跳过改点计算
         if( row > 1 && row < 14 && col > 1 && col < 14 &&
             this->_map[row-1][col-1] == Piece::Color::NONE &&
             this->_map[row-1][col] == Piece::Color::NONE &&
@@ -241,6 +255,19 @@ int Ai::min(Piece::Color turn, int step, int beta, int* row, int* col)
             {
                 score_step = this->score(turn) - this->score(COLOR_ANOTHER(turn));
                 totalSteps += 1;
+            }
+            else if(this->score(COLOR_ANOTHER(turn)) >= Ai::scoreList[ static_cast<int>(ScoreIndex::FIVE) ])
+            {
+                score_step = - Ai::scoreList[ static_cast<int>(ScoreIndex::FIVE) ] - 100 * step;
+                if(score_step < score)
+                {
+                    score = score_step;
+                    row_result = row;
+                    col_result = col;
+                }
+
+                this->_map[row][col] = Piece::Color::NONE;
+                break;
             }
             else
             {
