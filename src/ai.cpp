@@ -86,9 +86,9 @@ int Ai::getScoreIndex(int length, Piece::Color turn, Piece::Color prev, Piece::C
     return index;
 }
 
-Ai::Ai(Piece::Color (*map)[15][15])
+Ai::Ai(Piece::Color (*map)[15][15], Piece::Color turn)
 {
-    this->_situationMap = map;
+    this->_sourceMap = map;
     int i = 0;
     Ai::indexList[0][0] = 7;
     Ai::indexList[0][1] = 7;
@@ -123,11 +123,11 @@ bool Ai::update(SDL_Point* point)
     int row = -1;
     int col = -1;
     totalSteps = 0;
-    memcpy(&(this->_map), this->_situationMap, sizeof(Piece::Color[15][15]));
+    memcpy(&(this->_map), this->_sourceMap, sizeof(Piece::Color[15][15]));
     int score = this->max(Piece::Color::WHITE, 4, INT_MAX, &row, &col);
     SDL_Log("use %d steps", totalSteps);
     this->_map[row][col] = Piece::Color::WHITE;
-    (*(this->_situationMap))[row][col] = Piece::Color::WHITE;
+    (*(this->_sourceMap))[row][col] = Piece::Color::WHITE;
     SDL_Log("White go (%d,%d)", row, col);
     SDL_Log("Score : %d", score);
     SDL_Log("Black Score : %d", this->score(Piece::Color::BLACK));

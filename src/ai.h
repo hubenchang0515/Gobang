@@ -6,7 +6,7 @@
 class Ai
 {
 public:
-    Ai(Piece::Color (*map)[15][15]);
+    Ai(Piece::Color (*map)[15][15], Piece::Color turn);
     bool update(SDL_Point* point);
 
     /* 极大值搜索 */
@@ -31,7 +31,8 @@ public:
     int backSlashScore(Piece::Color turn);
 
 private:
-    Piece::Color (*_situationMap)[15][15];
+    Piece::Color _turn;
+    Piece::Color (*_sourceMap)[15][15];
     Piece::Color _map[15][15];
     static int indexList[15*15][2];
 

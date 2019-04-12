@@ -3,7 +3,7 @@
 
 Situation::Situation(int length) :
     _piece(length),
-    _ai(&(this->_map))
+    _ai(&(this->_map), Piece::Color::WHITE)
 {
     memset(this->_map, 0, sizeof(Piece::Color[15][15]));
     this->_turn = Piece::Color::BLACK;
